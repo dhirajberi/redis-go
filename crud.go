@@ -5,11 +5,6 @@ import (
 	"github.com/go-redis/redis"
 )
 
-// type Author struct {
-// 	Name string `json:"name"`
-// 	Age int `json:"age"`
-// }
-
 func GetHomePage(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "Get Page",
@@ -106,6 +101,27 @@ func Delete(c *gin.Context) {
 	})
 }
 
+func ReadOne(c *gin.Context) {
+	// Redis integration
+	Client := redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+		Password: "", // no password
+		DB: 0, // default DB
+	})
+
+	id:=c.Query("id")
+
+	val, err := Client.HGet("test", id).Result()
+    if err != nil {
+        fmt.Println(err)
+    }
+	fmt.Println(val)
+	
+	c.JSON(200, gin.H{
+		"message": val,
+	})
+}
+
 func main() {
 	
 	// Redis integration
@@ -121,5 +137,6 @@ func main() {
 	r.GET("/read", Read)
 	r.POST("/update", Update)
 	r.POST("/delete", Delete)
+	r.GET("/read_one", ReadOne)
 	r.Run()
 }
